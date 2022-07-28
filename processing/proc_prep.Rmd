@@ -1,23 +1,23 @@
 ---
 title: "Data Preparation"
 date: "`r format(Sys.time(), '%A %d %B %Y %X')`"
-output: 
-  html_document: 
+output:
+  html_document:
     toc: yes
     toc_float:
-      collapsed: yes
+      collapsed: no
       smooth_scroll: no
       number_sections: yes
-    code_folding: show  
+    code_folding: show
     number_sections: yes
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(warning = FALSE, 
-                      message = FALSE, 
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE,
                       echo = TRUE,
                       cache = FALSE
                       )
@@ -29,9 +29,9 @@ options(scipen=9999) # desactivar notacion cientifica
 # Libraries
 
 ```{r}
-# if (!require("pacman")) install.packages("pacman") # package manager 
+# if (!require("pacman")) install.packages("pacman") # package manager
                             # cargar librerias
-pacman::p_load(dplyr,       # Manipulacion de datos 
+pacman::p_load(dplyr,       # Manipulacion de datos
                haven,       # importar datos en .dta o .sav
                car,         # recodificar variables
                sjlabelled,  # etiquetado de variables
@@ -50,7 +50,7 @@ data <- read_dta("input/data/original/zhp_anchor_bv1_0.dta")
 
 ```
 
-There are `r nrow(data)` observations and `r ncol(data)` variables. 
+There are `r nrow(data)` observations and `r ncol(data)` variables.
 
 ## Search & select variables
 
@@ -78,7 +78,7 @@ frq(data_cohes$pcohes01) # check NAs
 Negative values to NA
 
 ```{r}
-data_cohes <- data_cohes %>% set_na(pcohes01:pcohes12, na = c(-9:-1), drop.levels = TRUE) 
+data_cohes <- data_cohes %>% set_na(pcohes01:pcohes12, na = c(-9:-1), drop.levels = TRUE)
 ```
 
 # Set labels
@@ -98,7 +98,7 @@ data_cohes$pcohes02 <- set_label(x = data_cohes$pcohes02, label = "Develop freel
 
 data_cohes$pcohes03 <- set_label(x=data_cohes$pcohes03, label= "Share values")
 
-data_cohes$pcohes04 <- set_label(x=data_cohes$pcohes04, label= "Different cultures") 
+data_cohes$pcohes04 <- set_label(x=data_cohes$pcohes04, label= "Different cultures")
 
 data_cohes$pcohes05 <- set_label(x=data_cohes$pcohes05, label= "Law & order")
 
@@ -140,7 +140,7 @@ save(rp, file="processing/objects/rp.Rdata")
 
 
 Generate careless indexes and merge with the original data in data_patterns object
- 
+
 ```{r}
 load("processing/objects/rp.Rdata")
 indices <- rp.indices(rp, round = 2, include.coefs = F)
@@ -156,7 +156,7 @@ Explore and define careless respondents:
 ```{r}
 data_patterns %>%  arrange(desc(sum.abs.ac)) %>% slice(1:20)
 
-careless <- data_patterns %>%  arrange(desc(sum.abs.ac)) %>% filter(sum.abs.ac>=4) 
+careless <- data_patterns %>%  arrange(desc(sum.abs.ac)) %>% filter(sum.abs.ac>=4)
 
 dim(careless)
 ```
@@ -179,17 +179,3 @@ data_cohes <- data_patterns %>% dplyr::select(pid, pcohes01:pcohes12,careless)
 ```{r}
 save(data_cohes, file="input/data/proc/data_cohes.Rdata")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-

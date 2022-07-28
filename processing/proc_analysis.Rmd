@@ -6,7 +6,7 @@ output:
     toc: yes
     code_folding: hide
     toc_float: 
-      collapsed: true
+      collapsed: no
       smooth_scroll: false
       number_sections: true
 editor_options: 
