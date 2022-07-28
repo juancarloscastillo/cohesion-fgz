@@ -1,0 +1,104 @@
+---
+title: "Analysis"
+date: "`r format(Sys.time(), '%A %d %B %Y %X')`"
+output: 
+  html_document: 
+    toc: yes
+    code_folding: hide
+    toc_float: 
+      collapsed: true
+      smooth_scroll: false
+      number_sections: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+options(scipen=9999) # desactivar notacion cientifica
+```
+
+
+# Libraries
+
+```{r}
+# if (!require("pacman")) install.packages("pacman") # instalar pacman
+pacman::p_load(dplyr,       # Manipulacion de datos 
+               sjmisc,      # descriptivos y frecuencias
+               sjPlot,      # tablas, plots y descriptivos
+               responsePatterns, # detect careless resp.
+               corrplot,     # plot correlacion
+               psych, # EFA
+               EFAutilities #EFA
+               )
+```
+
+# Data (prepared, code [here](processing/prod_prep.html))
+
+```{r}
+load(file = "input/data/proc/data_cohes.Rdata" )
+names(data_cohes)
+# stargazer(as.data.frame(data_cohes), type="text")
+```
+
+
+# Bivariate 
+
+```{r}
+data_cohes %>% select(pcohes05,pcohes02,pcohes07, pcohes11, pcohes09, pcohes04,pcohes01,pcohes12,pcohes10,pcohes06,pcohes03,pcohes08) %>% plot_likert(.,
+  values = "sum.outside",
+  show.prc.sign = TRUE,
+  reverse.scale = TRUE,
+  expand.grid = T,
+  catcount = 5,
+  show.n = FALSE,
+  geom.colors = "BuPu")
+
+
+M <- cor(na.omit(data_cohes %>% select(pcohes01:pcohes12)))
+
+corrplot.mixed(M)
+
+
+```
+
+# Factor analysis
+
+```{r}
+data_cohes_efa <- data_cohes %>% select(pcohes01:pcohes12)
+
+M1 <- fa (data_cohes_efa, nfactors=3, rotate="varimax", fm="ml")
+M1
+fa.diagram(M1, main="Social cohesion battery")
+
+```
+
+
+Alternative (sjPlot)
+
+```{r}
+data_cohes %>% select(pcohes02,pcohes04,pcohes07,pcohes11,pcohes12, pcohes01,pcohes03,pcohes05,pcohes08,pcohes09, pcohes06,pcohes10) %>%  
+sjPlot::tab_fa(., method = "ml", nmbr.fctr = 3, rotation = "varimax", alternate.rows = FALSE)
+```
+
+
+fa_table script  (not working)
+
+```{r eval=FALSE}
+source("processing/scripts/fa_table.R")
+tables <- fa_table(M1)
+tables$ind_table
+tables$f_table
+```
+
+
+Ideas:
+
+- comparison with pilot
+- EFA with pilot and CFA with wave 1
+- latent class / latent profile (see proc_analysis_LCA.Rmd)
+
+
+
+
+

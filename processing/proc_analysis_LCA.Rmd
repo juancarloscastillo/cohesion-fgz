@@ -1,0 +1,119 @@
+# Latent class
+
+Dicothomizing (for clear interpretation, alternative explor polythomous latent class and/or latent profile analysis later)
+
+
+```{r}
+data_cohes_dic <-  data_cohes %>%
+  rec(rec = "1,2,3=1; 4,5=2",
+      val.labels = c("low", "high"), suffix = "") 
+
+frq(data_cohes_dic$pcohes01) # check
+
+alpha(data_cohes_dic)
+```
+
+
+
+## Explore patterns
+
+```{r, include = FALSE}
+patterns=table(apply(data_cohes_dic, 1, paste, collapse=""))
+patterns_m=as.data.frame(patterns)
+patterns_m <- patterns_m[order(-patterns_m$Freq),] 
+patterns_m %>% slice(1:10) 
+
+```
+
+## Estimate model
+
+```{r}
+library(poLCA)
+
+names(data_cohes_dic)
+
+f <- cbind(pcohes01,pcohes02,pcohes03,pcohes04,pcohes05,pcohes06,pcohes07,pcohes08,pcohes09,pcohes10,pcohes11,pcohes12)~1
+
+set.seed(1234)
+lca1 <- poLCA(f,data_cohes_dic, nclass=1,graphs=F, verbose = FALSE)
+set.seed(1234)
+lca2 <- poLCA(f,data_cohes_dic, nclass=2,graphs=F, verbose = FALSE)
+set.seed(1234)
+lca3 <- poLCA(f,data_cohes_dic, nclass=3,graphs=F, verbose = FALSE)
+set.seed(1234)
+lca4 <- poLCA(f,data_cohes_dic, nclass=4,graphs=F, verbose = FALSE)
+set.seed(1234)
+lca5 <- poLCA(f,data_cohes_dic, nclass=5,graphs=F, verbose = FALSE)
+set.seed(1234)
+lca6 <- poLCA(f,data_cohes_dic, nclass=6,graphs=F, verbose = FALSE)
+set.seed(1234)
+lca7 <- poLCA(f,data_cohes_dic, nclass=7,graphs=F, verbose = FALSE)
+```
+
+
+##  Estadísticos de ajuste
+```{r}
+AIC.1 <-as.numeric(lca1$aic)
+AIC.2 <-as.numeric(lca2$aic)
+AIC.3 <-as.numeric(lca3$aic)
+AIC.4 <-as.numeric(lca4$aic)
+AIC.5 <-as.numeric(lca5$aic)
+AIC.6 <-as.numeric(lca6$aic)
+AIC.7 <-as.numeric(lca7$aic)
+
+BIC.1 <-as.numeric(lca1$bic)
+BIC.2 <-as.numeric(lca2$bic)
+BIC.3 <-as.numeric(lca3$bic)
+BIC.4 <-as.numeric(lca4$bic)
+BIC.5 <-as.numeric(lca5$bic)
+BIC.6 <-as.numeric(lca6$bic)
+BIC.7 <-as.numeric(lca7$bic)
+
+
+llik.1 <-as.numeric(lca1$llik)
+llik.2 <-as.numeric(lca2$llik)
+llik.3 <-as.numeric(lca3$llik)
+llik.4 <-as.numeric(lca4$llik)
+llik.5 <-as.numeric(lca5$llik)
+llik.6 <-as.numeric(lca6$llik)
+llik.7 <-as.numeric(lca7$llik)
+
+chisq.1 <- as.numeric(lca1$Chisq)
+chisq.2 <- as.numeric(lca2$Chisq)
+chisq.3 <- as.numeric(lca3$Chisq)
+chisq.4 <- as.numeric(lca4$Chisq)
+chisq.5 <- as.numeric(lca5$Chisq)
+chisq.6 <- as.numeric(lca6$Chisq)
+chisq.7 <- as.numeric(lca7$Chisq)
+
+G.1 <- as.numeric(lca1$Gsq)
+G.2 <- as.numeric(lca2$Gsq)
+G.3 <- as.numeric(lca3$Gsq)
+G.4 <- as.numeric(lca4$Gsq)
+G.5 <- as.numeric(lca5$Gsq)
+G.6 <- as.numeric(lca6$Gsq)
+G.7 <- as.numeric(lca7$Gsq)
+
+n.obs1 <- as.numeric(lca1$Nobs)
+n.obs2 <- as.numeric(lca2$Nobs)
+n.obs3 <- as.numeric(lca3$Nobs)
+n.obs4 <- as.numeric(lca4$Nobs)
+n.obs5 <- as.numeric(lca5$Nobs)
+n.obs6 <- as.numeric(lca6$Nobs)
+n.obs7 <- as.numeric(lca7$Nobs)
+
+#Creación de Vectores para TABLA DE COMPARACIÓN
+AIC <- c(AIC.1, AIC.2,AIC.3,AIC.4,AIC.5, AIC.6, AIC.7)
+BIC <- c(BIC.1, BIC.2,BIC.3,BIC.4,BIC.5, BIC.6, BIC.6)
+llik <- c(llik.1, llik.2,llik.3,llik.4,llik.5, llik.6, llik.7)
+chi.cuadrado <- c(chisq.1, chisq.2,chisq.3,chisq.4,chisq.5, chisq.6, chisq.7)
+G2 <- c(G.1, G.2,G.3,G.4,G.5, G.6, G.7)
+N <- c(n.obs1, n.obs2,n.obs3,n.obs4,n.obs5, n.obs6, n.obs7)
+Modelos <- c("1 clase", "2 clases", "3 clases", "4 clases", "5 clases", "6 clases", "7 clases")
+#CREACIÓN TABLA ESTADÍSTICOS DE AJUSTE MODELOS TODAS LAS VARIABLES
+fit.indices <- data.frame(Modelos,AIC,BIC,llik,chi.cuadrado,G2,N)
+fit.indices
+
+
+
+```

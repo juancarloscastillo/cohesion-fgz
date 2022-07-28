@@ -1,3 +1,4 @@
 # data/original
 
-- Aquí van las bases de datos originales/sin procesar
+- data was provided in July 2022, first wave first half
+- there are data use restrictions, only to affiliated to FGZ (embargo)
