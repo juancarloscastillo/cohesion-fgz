@@ -1,0 +1,210 @@
+---
+title: "Data Preparation - Pilot study"
+date: "`r format(Sys.time(), '%A %d %B %Y %X')`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+      number_sections: yes
+    code_folding: show
+    number_sections: yes
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE,
+                      echo = TRUE,
+                      cache = FALSE
+                      )
+options(scipen=9999) # desactivar notacion cientifica
+```
+
+
+
+# Libraries
+
+```{r}
+# if (!require("pacman")) install.packages("pacman") # package manager
+                            # cargar librerias
+pacman::p_load(dplyr,       # Manipulacion de datos
+               haven,       # importar datos en .dta o .sav
+               car,         # recodificar variables
+               sjlabelled,  # etiquetado de variables
+               sjmisc,      # descriptivos y frecuencias
+               sjPlot,      # tablas, plots y descriptivos
+               summarytools, # resumen de dataframe
+               responsePatterns # detect careless resp.)
+)
+
+```
+
+# Data
+
+```{r}
+data <- read_dta("input/data/original/pilot/FGZ Pilotstudie 2020 Betaversion.dta")
+
+```
+
+There are `r nrow(data)` observations and `r ncol(data)` variables.
+
+## Search & select variables
+
+```{r}
+# find_var(data = data,"Zusammenleben")
+find_var(data = data,"F27")
+
+# find_var(data = data,"id")
+find_var(data = data,"pid")
+
+data_cohes_pilot <- data %>% dplyr::select(pid, starts_with("F27")) # pid: person ID
+
+sjlabelled::get_label(data_cohes_pilot)
+```
+
+# Original data summary
+
+```{r}
+print(dfSummary(data_cohes_pilot, headings = FALSE), method = "render")
+```
+
+# NAs
+
+```{r}
+frq(data_cohes_pilot$F27_1) # check NAs:-1
+```
+
+Negative values to NA
+
+```{r}
+data_cohes_pilot <- data_cohes_pilot %>% set_na(F27_1:F27_10, na = -1, drop.levels = TRUE)
+frq(data_cohes_pilot$F27_1) # check 
+
+```
+
+# Set names/labels
+
+## Rename variables according to panel
+
+```{r}
+new_names <-c("pcohes01",
+              "pcohes02",
+              "pcohes03",
+              "pcohes04",
+              "pcohes05",
+              "pcohes06",
+              "pcohes07",
+              "pcohes08",
+              "pcohes09",
+              "pcohes10"
+              )
+
+data_cohes_pilot <- data_cohes_pilot %>%  
+  rename(pcohes01 = F27_1,
+         pcohes02 = F27_2,
+         pcohes03 = F27_3,
+         pcohes04 = F27_4,
+         pcohes05 = F27_5,
+         pcohes06 = F27_6,
+         pcohes07 = F27_7,
+         pcohes08 = F27_8,
+         pcohes09 = F27_9,
+         pcohes10 = F27_10
+         )
+
+names(data_cohes_pilot)
+
+```
+
+
+## English value labels
+
+```{r}
+data_cohes_pilot <- data_cohes_pilot %>% set_labels(pcohes01:pcohes10, labels = c("Not at all", "Rather not","In part", "Rather so", "Totally"))
+
+```
+
+## English variable labels
+
+```{r}
+data_cohes_pilot$pcohes01 <- set_label(x = data_cohes_pilot$pcohes01, label = "Place in society")
+data_cohes_pilot$pcohes02 <- set_label(x = data_cohes_pilot$pcohes02, label = "Develop freely")
+
+data_cohes_pilot$pcohes03 <- set_label(x=data_cohes_pilot$pcohes03, label= "Share values")
+
+data_cohes_pilot$pcohes04 <- set_label(x=data_cohes_pilot$pcohes04, label= "Different cultures")
+
+data_cohes_pilot$pcohes05 <- set_label(x=data_cohes_pilot$pcohes05, label= "Law & order")
+
+data_cohes_pilot$pcohes06 <-  set_label(x=data_cohes_pilot$pcohes06, label= "Live as wanted")
+
+data_cohes_pilot$pcohes07 <-  set_label(x=data_cohes_pilot$pcohes07, label= "Compromises worked out")
+
+data_cohes_pilot$pcohes08 <-  set_label(x=data_cohes_pilot$pcohes08, label= "Clear leadership")
+
+data_cohes_pilot$pcohes09 <-  set_label(x=data_cohes_pilot$pcohes09, label= "Tight links")
+
+data_cohes_pilot$pcohes10 <-  set_label(x=data_cohes_pilot$pcohes10, label= "Live freely")
+
+```
+
+
+Check labels
+
+```{r}
+view_df(data_cohes_pilot)
+```
+
+
+# Patterns of careless respondents (with library `responsePatterns`)
+
+Within subject autocorrelation
+
+```{r eval=FALSE}
+rp <- data_cohes_pilot %>% dplyr::select(-pid) %>%  responsePatterns::rp.acors(., max.lag = 5, na.rm = TRUE)
+rp.hist(rp)
+```
+
+Generate careless indexes and merge with the original data in data_patterns object
+
+```{r}
+indices <- rp.indices(rp, round = 2, include.coefs = F)
+
+data_patterns <-cbind(data_cohes_pilot,rp@coefficients, rp@indices)
+names(data_patterns)
+
+
+```
+
+
+Explore and define careless respondents:
+```{r}
+data_patterns %>%  arrange(desc(sum.abs.ac)) %>% slice(1:20)
+
+careless <- data_patterns %>%  arrange(desc(sum.abs.ac)) %>% filter(sum.abs.ac>=4)
+
+dim(careless)
+```
+
+
+Generate careless filter = 1
+
+```{r}
+data_patterns <-data_patterns %>% mutate(careless = ifelse(sum.abs.ac > 4, 1, 0))
+frq(data_patterns$careless)
+
+# replace
+data_cohes_pilot <- data_patterns %>% dplyr::select(pid, pcohes01:pcohes10,careless)
+
+```
+
+
+# Save dataset
+
+```{r}
+save(data_cohes_pilot, file="input/data/proc/data_cohes_pilot.Rdata")
+```

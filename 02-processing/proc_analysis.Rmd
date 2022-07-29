@@ -1,0 +1,184 @@
+---
+title: "Analysis"
+date: "`r format(Sys.time(), '%A %d %B %Y %X')`"
+output:
+  html_document:
+    toc: yes
+    code_folding: hide
+    toc_float:
+      collapsed: no
+      smooth_scroll: false
+      number_sections: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+options(scipen=9999) # desactivar notacion cientifica
+```
+
+
+# Objective
+
+Exploratory underlying dimensions (EFA) 
+
+
+# Libraries
+
+```{r}
+# if (!require("pacman")) install.packages("pacman") # instalar pacman
+pacman::p_load(dplyr,       # Manipulacion de datos
+               sjmisc,      # descriptivos y frecuencias
+               sjPlot,      # tablas, plots y descriptivos
+               responsePatterns, # detect careless resp.
+               corrplot,     # plot correlacion
+               psych, # EFA
+               EFAutilities, #EFA
+               lavaan  # CFA
+               )
+```
+
+
+# Pilot study
+
+
+## Data
+
+```{r}
+load(file = "01-input/data/proc/data_cohes_pilot.Rdata" )
+names(data_cohes_pilot)
+# stargazer(as.data.frame(data_cohes), type="text")
+```
+
+
+## Bivariate
+
+```{r}
+data_cohes_pilot %>% select(pcohes05,pcohes07,pcohes02, pcohes09, pcohes04,pcohes01,pcohes10,pcohes06,pcohes03,pcohes08) %>% plot_likert(.,
+  values = "sum.outside",
+  show.prc.sign = TRUE,
+  reverse.scale = TRUE,
+  expand.grid = T,
+  catcount = 5,
+  show.n = FALSE,
+  geom.colors = "BuPu")
+
+
+M_pilot <- cor(na.omit(data_cohes_pilot %>% select(pcohes01:pcohes10)))
+
+corrplot.mixed(M_pilot)
+
+
+```
+
+## Factor analysis
+
+```{r}
+data_cohes_efa <- data_cohes_pilot %>% select(pcohes01:pcohes10)
+
+M1_pilot <- fa (data_cohes_efa, nfactors=3, rotate="oblimin", fm="ml")
+M1_pilot
+fa.diagram(M1_pilot, main="Social cohesion battery - pilot study")
+
+```
+
+
+## fa_table script
+
+```{r}
+source("https://raw.githubusercontent.com/franciscowilhelm/r-collection/master/fa_table.R")
+
+tables <- fa_table(M1_pilot)
+tables$ind_table
+tables$f_table
+
+```
+
+
+## Alternative (sjPlot - with value labels)
+
+```{r}
+data_cohes_pilot %>% select(pcohes02,pcohes04,pcohes07, pcohes01,pcohes03,pcohes05,pcohes08,pcohes09, pcohes06,pcohes10) %>%
+sjPlot::tab_fa(., method = "ml", nmbr.fctr = 3, rotation = "varimax", alternate.rows = FALSE)
+```
+
+
+Conclusion: there is a three factor structure in the pilot data, now we will compare this underlying structure with the panel data.
+
+
+# Panel study - first wave
+
+## Data
+
+```{r}
+load(file = "01-input/data/proc/data_cohes_panel.Rdata" )
+names(data_cohes_panel)
+# stargazer(as.data.frame(data_cohes), type="text")
+```
+
+**Note**: The social cohesion battery in the panel study has 2 more items (11 & 12), they are excluded from the following analysis for the sake of comparison with the pilot study.
+
+
+## Bivariate
+
+```{r}
+data_cohes_panel %>% select(pcohes05,pcohes02,pcohes07, pcohes09, pcohes04,pcohes01,pcohes10,pcohes06,pcohes03,pcohes08) %>% plot_likert(.,
+  values = "sum.outside",
+  show.prc.sign = TRUE,
+  reverse.scale = TRUE,
+  expand.grid = T,
+  catcount = 5,
+  show.n = FALSE,
+  geom.colors = "BuPu")
+
+
+M_panel <- cor(na.omit(data_cohes_panel %>% select(pcohes01:pcohes12)))
+
+corrplot.mixed(M_panel)
+
+```
+
+
+## Factor analysis
+
+```{r}
+efa_panel <- data_cohes_panel %>% select(pcohes01:pcohes12)
+
+M1_panel <- fa (efa_panel, nfactors=3, rotate="oblimin", fm="ml")
+M1_panel
+fa.diagram(M1_panel, main="Social cohesion battery - pilot study")
+
+```
+
+
+## fa_table script
+
+```{r}
+source("https://raw.githubusercontent.com/franciscowilhelm/r-collection/master/fa_table.R")
+
+tables_panel <- fa_table(M1_panel)
+tables_panel$ind_table
+tables_panel$f_table
+
+```
+
+
+## Alternative (sjPlot)
+
+```{r}
+data_cohes_panel %>% select(pcohes02,pcohes04,pcohes07,pcohes11,pcohes12, pcohes01,pcohes03,pcohes05,pcohes08,pcohes09, pcohes06,pcohes10) %>%
+sjPlot::tab_fa(., method = "ml", nmbr.fctr = 3, rotation = "varimax", alternate.rows = FALSE)
+```
+
+
+# General conclusion
+
+The factor structrue is consistent between the pilot and the panel study. Three main factors are extracted, which could be named as "universal values", "traditional" and "free-riders". 
+
+Next: 
+- get factor scores and proceed to regression models. 
+- graphical representation of the prevalece of the three dimensions at territorial level (map).
+
+
+

@@ -1,0 +1,52 @@
+## Confirmatory factor analysis - panel data
+
+Data
+
+```{r}
+load(file = "01-input/data/proc/data_cohes_panel.Rdata" )
+names(data_cohes_panel)
+```
+
+Select - out 11 & 12 because not in the pilot
+
+```{r}
+data_cohes_cfa <- data_cohes_panel %>% 
+  select(pcohes01:pcohes10)
+```
+
+```{r}
+cfa_1 <-'
+# defnir variables latentes en base a indicadores
+universal =~ pcohes02 + pcohes04 + pcohes07 
+traditional =~ pcohes05 +  pcohes01 + pcohes03 + pcohes08 + pcohes09 
+freerider =~ pcohes06 + pcohes10
+'
+
+fit_1 <- cfa(cfa_1,data=data_cohes_cfa, ordered = c(colnames(data_cohes_cfa)))
+summary(fit_1, fit.measures=TRUE, standardized=TRUE)
+
+modificationIndices(fit_1)
+
+```
+
+- Bad fit indices, try letting out free-rider
+
+
+```{r}
+cfa_2 <-'
+# defnir variables latentes en base a indicadores
+universal =~ pcohes02 + pcohes04 + pcohes07 
+traditional =~ pcohes05 +  pcohes01 + pcohes03 + pcohes08 + pcohes09 
+# freerider =~ pcohes06 + pcohes10
+'
+
+fit_2 <- cfa(cfa_2,data=data_cohes_cfa, ordered = c(colnames(data_cohes_cfa)))
+summary(fit_2, fit.measures=TRUE, standardized=TRUE)
+
+```
+Loadings are low and some cross-loadings do not permit to improve the confirmatory factor structure based on the pilot exploration.
+
+
+
+
+

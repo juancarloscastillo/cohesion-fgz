@@ -1,0 +1,26 @@
+---
+output: github_document
+---
+
+```{r include=FALSE}
+
+# This Rmd is only for generating the README.md files with some R/Rmarkdown outputs, in this case the tree structure of the repository.
+
+```
+
+
+# [Social cohesion battery FGZ panel](https://juancarloscastillo.github.io/cohesion-fgz/)
+
+
+- Data preparation [here](processing/proc_prep.html)
+- Data analysis [here](processing/proc_analysis.html)
+
+
+## Repository structure
+
+```{r }
+fs::dir_tree(path = ".")
+```
+
+
+
