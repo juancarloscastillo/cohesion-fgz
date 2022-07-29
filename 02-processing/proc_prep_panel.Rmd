@@ -82,6 +82,19 @@ Negative values to NA
 data_cohes <- data_cohes %>% set_na(pcohes01:pcohes12, na = c(-9:-1), drop.levels = TRUE)
 ```
 
+Count rows with NAs & delete those with more than 5
+
+```{r}
+data_cohes$count_na <- rowSums(is.na(data_cohes))
+data_cohes %>% filter(count_na>5) %>% dim(.)  # 196 cases
+data_cohes <-data_cohes %>% filter(count_na<5) %>% select(-count_na)
+
+```
+
+
+
+
+
 # Set labels
 
 ## English value labels
@@ -134,16 +147,21 @@ Within subject autocorrelation
 
 ```{r eval=FALSE}
 rp <- data_cohes %>% dplyr::select(-pid) %>%  responsePatterns::rp.acors(., max.lag = 5, na.rm = TRUE)
-rp.hist(rp)
-save(rp, file="processing/objects/rp.Rdata")
+save(rp, file="02-processing/objects/rp.Rdata")
 ```
 * This takes a while, the object is saved in processing/objects and the chunk is switched off (eval=FALSE)
+
+
+```{r error=TRUE}
+load("02-processing/objects/rp.Rdata")
+rp.hist(rp)
+```
 
 
 Generate careless indexes and merge with the original data in data_patterns object
 
 ```{r}
-load("02-processing/objects/rp.Rdata")
+
 indices <- rp.indices(rp, round = 2, include.coefs = F)
 
 data_patterns <-cbind(data_cohes,rp@coefficients, rp@indices)
@@ -170,7 +188,8 @@ data_patterns <-data_patterns %>% mutate(careless = ifelse(sum.abs.ac > 4, 1, 0)
 frq(data_patterns$careless)
 
 # generate dataframe with careless
-data_cohes_panel <- data_patterns %>% dplyr::select(pid, pcohes01:pcohes12,careless)```
+data_cohes_panel <- data_patterns %>% dplyr::select(pid, pcohes01:pcohes12,careless)
+```
 
 
 # Save dataset

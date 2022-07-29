@@ -85,7 +85,7 @@ frq(data_cohes_pilot$F27_1) # check
 
 ```
 
-Count rows with NAs
+Count rows with NAs & delete those with more than 5
 
 ```{r}
 data_cohes_pilot$count_na <- rowSums(is.na(data_cohes_pilot))
