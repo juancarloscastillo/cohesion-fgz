@@ -22,6 +22,7 @@ knitr::opts_chunk$set(warning = FALSE,
                       cache = FALSE
                       )
 options(scipen=9999) # desactivar notacion cientifica
+knitr::opts_knit$set(root.dir = '..')
 ```
 
 

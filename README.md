@@ -1,10 +1,19 @@
 
 # [Social cohesion battery FGZ panel](https://juancarloscastillo.github.io/cohesion-fgz/)
 
--   Data preparation [here](processing/proc_prep.html)
--   Data analysis [here](processing/proc_analysis.html)
+-   Data preparation
+
+    -   [Pilot](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_prep_pilot.html)
+
+    -   [Panel](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_prep_panel.html)
+
+-   [Data
+    analysis](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis.html)
 
 ## Repository structure
+
+Based on [IPO (input-processing-output)
+protocol](https://lisa-coes.com/ipo-repro/)
 
 ``` r
 fs::dir_tree(path = ".")
@@ -39,9 +48,11 @@ fs::dir_tree(path = ".")
     ## │   ├── proc_analysis.Rmd
     ## │   ├── proc_analysis.html
     ## │   ├── proc_analysis_LCA.Rmd
-    ## │   ├── proc_prep.Rmd
-    ## │   ├── proc_prep.html
+    ## │   ├── proc_analysis_cfa.Rmd
+    ## │   ├── proc_prep_panel.Rmd
+    ## │   ├── proc_prep_panel.html
     ## │   ├── proc_prep_pilot.Rmd
+    ## │   ├── proc_prep_pilot.html
     ## │   └── scripts
     ## │       └── fa_table.R
     ## ├── 03-output
@@ -52,5 +63,4 @@ fs::dir_tree(path = ".")
     ## ├── README.Rmd
     ## ├── README.md
     ## ├── _config.yml
-    ## ├── notes.md
     ## └── project.Rproj

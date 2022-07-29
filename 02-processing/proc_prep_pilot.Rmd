@@ -22,9 +22,8 @@ knitr::opts_chunk$set(warning = FALSE,
                       cache = FALSE
                       )
 options(scipen=9999) # desactivar notacion cientifica
+knitr::opts_knit$set(root.dir = '..')
 ```
-
-
 
 # Libraries
 
@@ -46,7 +45,7 @@ pacman::p_load(dplyr,       # Manipulacion de datos
 # Data
 
 ```{r}
-data <- read_dta("input/data/original/pilot/FGZ Pilotstudie 2020 Betaversion.dta")
+data <- read_dta("01-input/data/original/pilot/FGZ Pilotstudie 2020 Betaversion.dta")
 
 ```
 
@@ -82,28 +81,27 @@ Negative values to NA
 
 ```{r}
 data_cohes_pilot <- data_cohes_pilot %>% set_na(F27_1:F27_10, na = -1, drop.levels = TRUE)
-frq(data_cohes_pilot$F27_1) # check 
+frq(data_cohes_pilot$F27_1) # check
 
 ```
+
+Count rows with NAs
+
+```{r}
+data_cohes_pilot$count_na <- rowSums(is.na(data_cohes_pilot))
+data_cohes_pilot %>% filter(count_na>5) # 2 cases
+data_cohes_pilot <-data_cohes_pilot %>% filter(count_na<5) %>% select(-count_na)
+
+```
+
+
 
 # Set names/labels
 
 ## Rename variables according to panel
 
 ```{r}
-new_names <-c("pcohes01",
-              "pcohes02",
-              "pcohes03",
-              "pcohes04",
-              "pcohes05",
-              "pcohes06",
-              "pcohes07",
-              "pcohes08",
-              "pcohes09",
-              "pcohes10"
-              )
-
-data_cohes_pilot <- data_cohes_pilot %>%  
+data_cohes_pilot <- data_cohes_pilot %>%
   rename(pcohes01 = F27_1,
          pcohes02 = F27_2,
          pcohes03 = F27_3,
@@ -133,7 +131,6 @@ data_cohes_pilot <- data_cohes_pilot %>% set_labels(pcohes01:pcohes10, labels = 
 ```{r}
 data_cohes_pilot$pcohes01 <- set_label(x = data_cohes_pilot$pcohes01, label = "Place in society")
 data_cohes_pilot$pcohes02 <- set_label(x = data_cohes_pilot$pcohes02, label = "Develop freely")
-
 data_cohes_pilot$pcohes03 <- set_label(x=data_cohes_pilot$pcohes03, label= "Share values")
 
 data_cohes_pilot$pcohes04 <- set_label(x=data_cohes_pilot$pcohes04, label= "Different cultures")
@@ -164,8 +161,11 @@ view_df(data_cohes_pilot)
 
 Within subject autocorrelation
 
-```{r eval=FALSE}
-rp <- data_cohes_pilot %>% dplyr::select(-pid) %>%  responsePatterns::rp.acors(., max.lag = 5, na.rm = TRUE)
+```{r eval=TRUE}
+rp <- data_cohes_pilot %>%  responsePatterns::rp.acors(., max.lag = 5, na.rm = TRUE, id.var = "pid")
+
+rp@indices$max.abs.ac <- na.omit(rp@indices$max.abs.ac)
+
 rp.hist(rp)
 ```
 
@@ -206,5 +206,5 @@ data_cohes_pilot <- data_patterns %>% dplyr::select(pid, pcohes01:pcohes10,carel
 # Save dataset
 
 ```{r}
-save(data_cohes_pilot, file="input/data/proc/data_cohes_pilot.Rdata")
+save(data_cohes_pilot, file="01-input/data/proc/data_cohes_pilot.Rdata")
 ```

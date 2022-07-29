@@ -3,6 +3,7 @@ title: "Analysis"
 date: "`r format(Sys.time(), '%A %d %B %Y %X')`"
 output:
   html_document:
+    number_sections: TRUE 
     toc: yes
     code_folding: hide
     toc_float:
@@ -74,17 +75,20 @@ corrplot.mixed(M_pilot)
 
 ## Factor analysis
 
+### Estimate with fa (psych library)
+
 ```{r}
 data_cohes_efa <- data_cohes_pilot %>% select(pcohes01:pcohes10)
 
 M1_pilot <- fa (data_cohes_efa, nfactors=3, rotate="oblimin", fm="ml")
 M1_pilot
+
 fa.diagram(M1_pilot, main="Social cohesion battery - pilot study")
 
 ```
 
 
-## fa_table script
+### Tables
 
 ```{r}
 source("https://raw.githubusercontent.com/franciscowilhelm/r-collection/master/fa_table.R")
@@ -96,7 +100,7 @@ tables$f_table
 ```
 
 
-## Alternative (sjPlot - with value labels)
+### Alternative table (sjPlot - with value labels)
 
 ```{r}
 data_cohes_pilot %>% select(pcohes02,pcohes04,pcohes07, pcohes01,pcohes03,pcohes05,pcohes08,pcohes09, pcohes06,pcohes10) %>%
@@ -133,14 +137,16 @@ data_cohes_panel %>% select(pcohes05,pcohes02,pcohes07, pcohes09, pcohes04,pcohe
   geom.colors = "BuPu")
 
 
-M_panel <- cor(na.omit(data_cohes_panel %>% select(pcohes01:pcohes12)))
-
-corrplot.mixed(M_panel)
-
+M_panel <-
+data_cohes_panel %>% select(pcohes02,pcohes04,pcohes07,pcohes11,pcohes12, pcohes01,pcohes03,pcohes05,pcohes08,pcohes09, pcohes06,pcohes10) %>%
+sjPlot::tab_fa(., method = "ml", nmbr.fctr = 3, rotation = "varimax", alternate.rows = FALSE)
 ```
 
 
+
 ## Factor analysis
+
+### Estimate with fa (psych library)
 
 ```{r}
 efa_panel <- data_cohes_panel %>% select(pcohes01:pcohes12)
@@ -152,7 +158,7 @@ fa.diagram(M1_panel, main="Social cohesion battery - pilot study")
 ```
 
 
-## fa_table script
+### Tables
 
 ```{r}
 source("https://raw.githubusercontent.com/franciscowilhelm/r-collection/master/fa_table.R")
@@ -164,7 +170,7 @@ tables_panel$f_table
 ```
 
 
-## Alternative (sjPlot)
+### Alternative (sjPlot)
 
 ```{r}
 data_cohes_panel %>% select(pcohes02,pcohes04,pcohes07,pcohes11,pcohes12, pcohes01,pcohes03,pcohes05,pcohes08,pcohes09, pcohes06,pcohes10) %>%
@@ -174,9 +180,14 @@ sjPlot::tab_fa(., method = "ml", nmbr.fctr = 3, rotation = "varimax", alternate.
 
 # General conclusion
 
-The factor structrue is consistent between the pilot and the panel study. Three main factors are extracted, which could be named as "universal values", "traditional" and "free-riders". 
+- The factor structrue is consistent between the pilot and the panel study. 
+- The panel additional items (2) are part of the first dimension
+- Three main factors are extracted, which could be named as "universal values", "traditional" and "free-riders". 
+- Although the structure is stable between studies, there were some problems when trying to proceed with confirmatory factor analysis as the factor loadings are rather weak and the explained variance is low (see proc_analysys_cfa.Rmd). 
+
 
 Next: 
+
 - get factor scores and proceed to regression models. 
 - graphical representation of the prevalece of the three dimensions at territorial level (map).
 

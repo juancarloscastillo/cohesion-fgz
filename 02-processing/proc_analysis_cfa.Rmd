@@ -1,6 +1,19 @@
-## Confirmatory factor analysis - panel data
+# Confirmatory factor analysis - panel data
 
-Data
+
+# Libraries
+
+```{r}
+# if (!require("pacman")) install.packages("pacman") # instalar pacman
+pacman::p_load(dplyr,       # Manipulacion de datos
+               lavaan  # CFA
+               )
+```
+
+
+
+
+# Data
 
 ```{r}
 load(file = "01-input/data/proc/data_cohes_panel.Rdata" )
@@ -14,7 +27,10 @@ data_cohes_cfa <- data_cohes_panel %>%
   select(pcohes01:pcohes10)
 ```
 
+# Estimation
+
 ```{r}
+
 cfa_1 <-'
 # defnir variables latentes en base a indicadores
 universal =~ pcohes02 + pcohes04 + pcohes07 
