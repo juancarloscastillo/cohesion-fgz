@@ -12,22 +12,22 @@ output: github_document
 # [Social cohesion battery FGZ panel](https://juancarloscastillo.github.io/cohesion-fgz/)
 
 
-- Data preparation 
+- Data preparation
 
   - [Pilot](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_prep_pilot.html)
 
   - [Panel](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_prep_panel.html)
 
-- [Data analysis](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis.html)
+- Data analysis
+
+  - [Descriptives & EFA pilot/panel comparison](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis.html)
+  - [Latent Class Analysis - pilot](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis_LCA.html)
 
 
 ## Repository structure
 
-Based on [IPO (input-processing-output) protocol](https://lisa-coes.com/ipo-repro/) 
+Based on [IPO (input-processing-output) protocol](https://lisa-coes.com/ipo-repro/)
 
 ```{r }
 fs::dir_tree(path = ".")
 ```
-
-
-

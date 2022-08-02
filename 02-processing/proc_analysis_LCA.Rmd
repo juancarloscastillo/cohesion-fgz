@@ -1,10 +1,34 @@
-# Latent class
+---
+title: "latent class - Pilot study"
+date: "`r format(Sys.time(), '%A %d %B %Y %X')`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+      number_sections: yes
+    code_folding: show
+    number_sections: yes
+editor_options:
+  chunk_output_type: console
+---
+
+# Libraries
+
+```{r}
+pacman::p_load(dplyr, poLCA, sjmisc, psych,sjlabelled)
+```
+
+
+# Data & Recodes
 
 Dicothomizing (for clear interpretation, alternative explor polythomous latent class and/or latent profile analysis later)
 
-
 ```{r}
-data_cohes_dic <-  data_cohes %>%
+load("01-input/data/proc/data_cohes_pilot.Rdata")
+names(data_cohes_pilot)
+data_cohes_dic <-  data_cohes_pilot %>% dplyr::select(-pid,-careless) %>% 
   rec(rec = "1,2,3=1; 4,5=2",
       val.labels = c("low", "high"), suffix = "") 
 
@@ -15,9 +39,9 @@ alpha(data_cohes_dic)
 
 
 
-## Explore patterns
+# Explore patterns
 
-```{r, include = FALSE}
+```{r}
 patterns=table(apply(data_cohes_dic, 1, paste, collapse=""))
 patterns_m=as.data.frame(patterns)
 patterns_m <- patterns_m[order(-patterns_m$Freq),] 
@@ -25,14 +49,13 @@ patterns_m %>% slice(1:10)
 
 ```
 
-## Estimate model
+# Models estimation
 
 ```{r}
-library(poLCA)
 
 names(data_cohes_dic)
 
-f <- cbind(pcohes01,pcohes02,pcohes03,pcohes04,pcohes05,pcohes06,pcohes07,pcohes08,pcohes09,pcohes10,pcohes11,pcohes12)~1
+f <- cbind(pcohes01,pcohes02,pcohes03,pcohes04,pcohes05,pcohes06,pcohes07,pcohes08,pcohes09,pcohes10)~1
 
 set.seed(1234)
 lca1 <- poLCA(f,data_cohes_dic, nclass=1,graphs=F, verbose = FALSE)
@@ -51,7 +74,8 @@ lca7 <- poLCA(f,data_cohes_dic, nclass=7,graphs=F, verbose = FALSE)
 ```
 
 
-##  Estadísticos de ajuste
+# Model fit
+
 ```{r}
 AIC.1 <-as.numeric(lca1$aic)
 AIC.2 <-as.numeric(lca2$aic)
@@ -113,7 +137,137 @@ Modelos <- c("1 clase", "2 clases", "3 clases", "4 clases", "5 clases", "6 clase
 #CREACIÓN TABLA ESTADÍSTICOS DE AJUSTE MODELOS TODAS LAS VARIABLES
 fit.indices <- data.frame(Modelos,AIC,BIC,llik,chi.cuadrado,G2,N)
 fit.indices
+```
 
+From the fit indicators, according t BIC and chi2 4 classes are selected.
+
+
+
+# 4 classes
+
+Default:
+
+```{r}
+set.seed(1234)
+poLCA(f,data_cohes_dic, nclass=4,graphs=T, verbose = FALSE)
 
 
 ```
+
+
+**Alternative graph 4 class**
+
+
+```{r, fig.width=10, fig.height=4}
+lca4_probs=as.data.frame(lca4$probs)
+dim(lca4_probs)
+names(lca4_probs)
+datlca_tot_par=lca4_probs[c(2,4,6,8,10,12,14,16,18,20)]  # prob only  "yes"
+datlca_tot_par$class=c(1:4) # añadir número de clase
+library(reshape2)
+datlca_tot_parl=melt(datlca_tot_par, id=c("class") )
+str(datlca_tot_parl)
+print(levels(datlca_tot_parl$variable))
+
+# Relabel factors
+
+get_label(data_cohes_pilot)
+datlca_tot_parl$variable=factor(datlca_tot_parl$variable, labels=c(
+    "Place in society",
+    "Develop freely",
+    "Share values",
+    "Different cultures",
+    "Law & order" ,
+    "Live as wanted",
+    "Compromises worked out",
+    "Clear leadership",
+    "Tight links",
+    "Live freely"     
+    ))
+  
+  lca4$P # class size
+  datlca_tot_parl$class=factor(datlca_tot_parl$class,labels=c("Class 1 (34%)", "Class 2 (35%)", "Class 3 (25%)", "Class 4 (0.04%"))
+  library(ggplot2)
+
+lca4_graph <-ggplot(data = datlca_tot_parl, aes(x=variable, y=value, group=class, shape=class)) + 
+    geom_line(aes(linetype=class, color=class)) + 
+    geom_point(aes(colour=class),size = 4) +
+    scale_color_manual(values=c('#F31111','#04129B', '#02971B', '#764080')) +
+    ggtitle("Latent class social cohesion") + 
+    xlab("Social Cohesión Indicators") + 
+    ylab("Conditional probabilities") +
+    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+    theme(text=element_text(family="Arial", size=12),
+        plot.caption = element_text(hjust = 0))
+
+lca4_graph
+  
+
+```
+
+- CLass 1: liberal
+- Class 2: conservative
+- Class 3: universal
+- Class 4: ...very small
+
+As class 4 is very small, let's try with a 3 class model
+
+
+# 3 classes
+
+```{r, fig.width=10, fig.height=4}
+# Graph latent classes, 3 clases
+lca3_probs=as.data.frame(lca3$probs)
+dim(lca3_probs)
+names(lca3_probs)
+datlca_tot_par=lca3_probs[c(2,4,6,8,10,12,14,16,18,20)]  # prob only  "yes"
+datlca_tot_par$class=c(1:3) # añadir número de clase
+library(reshape2)
+datlca_tot_parl=melt(datlca_tot_par, id=c("class") )
+str(datlca_tot_parl)
+print(levels(datlca_tot_parl$variable))
+
+# Relabel factors
+
+get_label(data_cohes_pilot)
+datlca_tot_parl$variable=factor(datlca_tot_parl$variable, labels=c(
+    "Place in society",
+    "Develop freely",
+    "Share values",
+    "Different cultures",
+    "Law & order" ,
+    "Live as wanted",
+    "Compromises worked out",
+    "Clear leadership",
+    "Tight links",
+    "Live freely"     
+    ))
+  
+  lca3$P # class size
+  datlca_tot_parl$class=factor(datlca_tot_parl$class,labels=c("Class 1 (33%)", "Class 2 (20%)", "Class 3 (46%)"))
+  library(ggplot2)
+
+lca3_graph <-ggplot(data = datlca_tot_parl, aes(x=variable, y=value, group=class, shape=class)) + 
+    geom_line(aes(linetype=class, color=class)) + 
+    geom_point(aes(colour=class),size = 4) +
+    scale_color_manual(values=c('#F31111','#04129B', '#02971B')) +
+    ggtitle("Latent class social cohesion") + 
+    xlab("Social Cohesión Indicators") + 
+    ylab("Conditional probabilities") +
+    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+    theme(text=element_text(family="Arial", size=12),
+        plot.caption = element_text(hjust = 0))
+
+lca3_graph
+
+```
+
+
+
+
+
+
+
+
+
+

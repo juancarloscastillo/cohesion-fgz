@@ -7,8 +7,12 @@
 
     -   [Panel](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_prep_panel.html)
 
--   [Data
-    analysis](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis.html)
+-   Data analysis
+
+    -   [Descriptives & EFA pilot/panel
+        comparison](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis.html)
+    -   [Latent Class Analysis -
+        pilot](https://juancarloscastillo.github.io/cohesion-fgz/02-processing/proc_analysis_LCA.html)
 
 ## Repository structure
 
@@ -48,6 +52,7 @@ fs::dir_tree(path = ".")
     ## │   ├── proc_analysis.Rmd
     ## │   ├── proc_analysis.html
     ## │   ├── proc_analysis_LCA.Rmd
+    ## │   ├── proc_analysis_LCA.html
     ## │   ├── proc_analysis_cfa.Rmd
     ## │   ├── proc_prep_panel.Rmd
     ## │   ├── proc_prep_panel.html
